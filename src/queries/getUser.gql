@@ -1,0 +1,5 @@
+{
+  getUser(username:"admin") {
+    username
+  }
+}
