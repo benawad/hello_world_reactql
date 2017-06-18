@@ -135,6 +135,22 @@ class CreateUser extends React.Component {
               variables: {
                 username: this.state.username,
               },
+              optimisticResponse: {
+                __typename: 'Mutation',
+                createUser: {
+                  __typename: 'User',
+                  id: -1,
+                  username: this.state.username,
+                },
+              },
+              update: (store, { data }) => {
+                // Read the data from our cache for this query.
+                const data2 = store.readQuery({ query: allUsers });
+                // Add our user from the mutation to the end.
+                data2.allUsers.push(data.createUser);
+                // Write our data back to the cache.
+                store.writeQuery({ query: allUsers, data: data2 });
+              },
             })}>
           Create a user
         </button>
