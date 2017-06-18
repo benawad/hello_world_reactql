@@ -117,11 +117,31 @@ class GraphQLMessage extends React.PureComponent {
   }
 }
 
-const MButton = ({ mutate }) => (
-  <button onClick={() => mutate()}>Create a user</button>
-);
+@graphql(createUser)
+class CreateUser extends React.Component {
+  state = {
+    username: '',
+  };
 
-const MutationButton = graphql(createUser)(MButton);
+  render() {
+    return (
+      <div>
+        <input
+          value={this.username}
+          onChange={e => this.setState({ username: e.target.value })} />
+        <button
+          onClick={() =>
+            this.props.mutate({
+              variables: {
+                username: this.state.username,
+              },
+            })}>
+          Create a user
+        </button>
+      </div>
+    );
+  }
+}
 
 // Example of CSS, SASS and LESS styles being used together
 const Styles = () => (
@@ -151,7 +171,7 @@ export default () => (
     <hr />
     <GraphQLMessage />
     <hr />
-    <MutationButton />
+    <CreateUser />
     <ul>
       <li><Link to="/">Home</Link></li>
       <li><Link to="/page/about">About</Link></li>
