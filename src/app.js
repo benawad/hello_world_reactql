@@ -22,7 +22,10 @@ import Helmet from 'react-helmet';
 import { NotFound, Redirect } from 'kit/lib/routing';
 
 // GraphQL queries
-import getUser from 'src/queries/getUser.gql';
+import allUsers from 'src/queries/allUsers.gql';
+
+// GraphQL mutations
+import createUser from 'src/mutations/createUser.gql';
 
 // Styles
 import './styles.global.css';
@@ -80,34 +83,45 @@ const Stats = () => {
 /*
 {
   data: {
-    getUser: {
+    allUsers: {
       username: "admin"
     }
   }
 }
 */
-@graphql(getUser)
+@graphql(allUsers)
 class GraphQLMessage extends React.PureComponent {
   static propTypes = {
     data: PropTypes.shape({
-      getUser: PropTypes.shape({
-        username: PropTypes.string.isRequired,
-      }),
+      allUsers: PropTypes.arrayOf(
+        PropTypes.shape({
+          username: PropTypes.string.isRequired,
+        }),
+      ),
     }),
   };
 
   render() {
     const { data } = this.props;
-    const username = data.getUser && data.getUser.username;
+    const users = data.allUsers || [];
     const isLoading = data.loading ? 'yes' : 'nope';
     return (
       <div>
-        <h2>Message from GraphQL server: My username is <em>{username}</em></h2>
+        <h2>
+          Message from GraphQL server: My username is
+          {users.map(u => <em key={u.id}> {u.username},</em>)}
+        </h2>
         <h2>Currently loading?: {isLoading}</h2>
       </div>
     );
   }
 }
+
+const MButton = ({ mutate }) => (
+  <button onClick={() => mutate()}>Create a user</button>
+);
+
+const MutationButton = graphql(createUser)(MButton);
 
 // Example of CSS, SASS and LESS styles being used together
 const Styles = () => (
@@ -137,6 +151,7 @@ export default () => (
     <hr />
     <GraphQLMessage />
     <hr />
+    <MutationButton />
     <ul>
       <li><Link to="/">Home</Link></li>
       <li><Link to="/page/about">About</Link></li>

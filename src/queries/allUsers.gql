@@ -1,0 +1,6 @@
+{
+  allUsers {
+    id
+    username
+  }
+}

@@ -1,5 +1,0 @@
-{
-  getUser(username:"admin") {
-    username
-  }
-}
