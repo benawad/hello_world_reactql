@@ -27,6 +27,9 @@ import allUsers from 'src/queries/allUsers.gql';
 // GraphQL mutations
 import createUser from 'src/mutations/createUser.gql';
 
+// GraphQL subscriptions
+import userAdded from 'src/subscriptions/userAdded.gql';
+
 // Styles
 import './styles.global.css';
 import css from './styles.css';
@@ -101,6 +104,28 @@ class GraphQLMessage extends React.PureComponent {
     }),
   };
 
+  componentWillMount() {
+    this.props.data.subscribeToMore({
+      document: userAdded,
+      updateQuery: (prev, { subscriptionData }) => {
+        /*
+          prev = {
+            anotherQuery: {}
+            allUsers: [bob1, bob2, ...],
+          }
+        */
+        if (!subscriptionData.data) {
+          return prev;
+        }
+        const newUser = subscriptionData.data.userAdded;
+        return {
+          ...prev,
+          allUsers: [newUser, ...prev.allUsers],
+        };
+      },
+    });
+  }
+
   render() {
     const { data } = this.props;
     const users = data.allUsers || [];
@@ -134,22 +159,6 @@ class CreateUser extends React.Component {
             this.props.mutate({
               variables: {
                 username: this.state.username,
-              },
-              optimisticResponse: {
-                __typename: 'Mutation',
-                createUser: {
-                  __typename: 'User',
-                  id: -1,
-                  username: this.state.username,
-                },
-              },
-              update: (store, { data }) => {
-                // Read the data from our cache for this query.
-                const data2 = store.readQuery({ query: allUsers });
-                // Add our user from the mutation to the end.
-                data2.allUsers.push(data.createUser);
-                // Write our data back to the cache.
-                store.writeQuery({ query: allUsers, data: data2 });
               },
             })}>
           Create a user
